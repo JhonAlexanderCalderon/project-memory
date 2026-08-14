@@ -37,6 +37,7 @@ export default function QuickCapture() {
     setOpen(false)
     setText('')
     setNotice(null)
+    setTranscribing(false)
     voice.reset()
   }
 
@@ -46,6 +47,10 @@ export default function QuickCapture() {
       const blob = await voice.stop()
       if (!blob) return
       setSource('voice')
+      if (blob.size === 0) {
+        setNotice('No se detectó audio. Intenta grabar de nuevo.')
+        return
+      }
       if (!isWorkerConfigured()) {
         setNotice('Transcripción de voz aún no configurada — puedes escribir el texto manualmente. Configúrala en Settings.')
         return
@@ -54,8 +59,9 @@ export default function QuickCapture() {
       try {
         const transcript = await transcribeAudio(blob)
         setText((prev) => (prev ? `${prev} ${transcript}` : transcript))
-      } catch {
-        setNotice('No se pudo transcribir. Intenta de nuevo o escribe el texto.')
+      } catch (e) {
+        console.error('Transcription failed:', e)
+        setNotice(e instanceof Error ? e.message : 'No se pudo transcribir. Intenta de nuevo o escribe el texto.')
       } finally {
         setTranscribing(false)
       }

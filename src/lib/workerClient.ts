@@ -15,16 +15,31 @@ export function isWorkerConfigured(): boolean {
   return Boolean(getWorkerUrl())
 }
 
+const REQUEST_TIMEOUT_MS = 25_000
+
 async function authedFetch(path: string, body: BodyInit, headers: Record<string, string> = {}) {
   const workerUrl = getWorkerUrl()
   if (!workerUrl) throw new Error('Worker URL not configured. Set it in Settings.')
   const token = await auth.currentUser?.getIdToken()
   if (!token) throw new Error('Not signed in.')
-  const res = await fetch(`${workerUrl}${path}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, ...headers },
-    body,
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(`${workerUrl}${path}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, ...headers },
+      body,
+      signal: controller.signal,
+    })
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error('Request timed out. Check your connection and try again.')
+    }
+    throw new Error('Network error. Check your connection and try again.')
+  } finally {
+    clearTimeout(timeout)
+  }
   if (!res.ok) throw new Error(`Worker request failed: ${res.status}`)
   return res.json()
 }
