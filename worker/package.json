@@ -1,0 +1,17 @@
+{
+  "name": "project-memory-worker",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0",
+    "typescript": "^5.6.0",
+    "@cloudflare/workers-types": "^4.20241106.0"
+  },
+  "dependencies": {
+    "jose": "^5.9.6"
+  }
+}
