@@ -2,7 +2,6 @@ import { initializeApp } from 'firebase/app'
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut as firebaseSignOut,
@@ -39,13 +38,10 @@ export const db = initializeFirestore(app, {
 
 const googleProvider = new GoogleAuthProvider()
 
-// Popup is nicer on desktop; redirect is more reliable inside an installed PWA on Android.
-const isStandalone =
-  window.matchMedia?.('(display-mode: standalone)').matches ||
-  (window.navigator as unknown as { standalone?: boolean }).standalone === true
-
+// Always use redirect: popups are unreliable on mobile browsers and inside installed
+// PWAs (silently blocked or never return), while redirect works everywhere.
 export function signInWithGoogle() {
-  return isStandalone ? signInWithRedirect(auth, googleProvider) : signInWithPopup(auth, googleProvider)
+  return signInWithRedirect(auth, googleProvider)
 }
 
 export function completeRedirectSignIn() {

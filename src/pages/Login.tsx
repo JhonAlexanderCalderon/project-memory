@@ -1,7 +1,39 @@
-import { BrainCircuit } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { BrainCircuit, Loader2 } from 'lucide-react'
 import { signInWithGoogle } from '../lib/firebase'
+import { useAuthContext } from '../lib/AuthContext'
+
+function authErrorMessage(err: unknown): string {
+  const code = (err as { code?: string })?.code
+  if (code === 'auth/unauthorized-domain') {
+    return 'This domain is not authorized for sign-in yet. Add it in Firebase Console → Authentication → Settings → Authorized domains.'
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'Network error — check your connection and try again.'
+  }
+  return code ? `Sign-in failed (${code}). Please try again.` : 'Sign-in failed. Please try again.'
+}
 
 export default function Login() {
+  const { redirectError } = useAuthContext()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (redirectError) setError(authErrorMessage(redirectError))
+  }, [redirectError])
+
+  async function handleSignIn() {
+    setError(null)
+    setLoading(true)
+    try {
+      await signInWithGoogle()
+    } catch (err) {
+      setError(authErrorMessage(err))
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-slate-950 px-6 text-center">
       <div className="flex flex-col items-center gap-3">
@@ -13,10 +45,13 @@ export default function Login() {
           Capture now. Organize later. Your personal second brain for every project.
         </p>
       </div>
+      {error && <p className="max-w-xs text-sm text-red-400">{error}</p>}
       <button
-        onClick={() => signInWithGoogle()}
-        className="flex items-center gap-3 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition-transform active:scale-95"
+        onClick={handleSignIn}
+        disabled={loading}
+        className="flex items-center gap-3 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition-transform active:scale-95 disabled:opacity-60"
       >
+        {loading && <Loader2 size={18} className="animate-spin" />}
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
