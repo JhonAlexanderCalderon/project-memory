@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app'
 import {
-  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
@@ -31,7 +33,15 @@ const firebaseConfig = {
 }
 
 export const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
+// Force localStorage-backed persistence instead of the SDK's default IndexedDB
+// persistence — IndexedDB connections get force-closed when an installed PWA is
+// backgrounded (which happens during the Google redirect flow), causing auth to
+// fail with an opaque "Database is closing/hidden" error right when the user
+// returns from picking their account. localStorage has no such connection to lose.
+export const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver,
+})
 
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
