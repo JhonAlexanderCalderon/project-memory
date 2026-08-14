@@ -3,8 +3,11 @@ import { BrainCircuit, Loader2 } from 'lucide-react'
 import { signInWithGoogle } from '../lib/firebase'
 import { useAuthContext } from '../lib/AuthContext'
 
-function authErrorMessage(err: unknown): string {
+function authErrorMessage(err: unknown): string | null {
   const code = (err as { code?: string })?.code
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+    return null
+  }
   if (code === 'auth/unauthorized-domain') {
     return 'This domain is not authorized for sign-in yet. Add it in Firebase Console → Authentication → Settings → Authorized domains.'
   }

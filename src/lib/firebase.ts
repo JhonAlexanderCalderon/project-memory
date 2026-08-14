@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app'
 import {
   getAuth,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut as firebaseSignOut,
@@ -38,10 +39,23 @@ export const db = initializeFirestore(app, {
 
 const googleProvider = new GoogleAuthProvider()
 
-// Always use redirect: popups are unreliable on mobile browsers and inside installed
-// PWAs (silently blocked or never return), while redirect works everywhere.
-export function signInWithGoogle() {
-  return signInWithRedirect(auth, googleProvider)
+// Popup first: it keeps the whole flow in one live browsing context (talking via
+// postMessage), which survives real-world mobile Chrome storage partitioning between
+// this app's origin and the authDomain — redirect requires that state to persist
+// across a full page unload/reload and silently drops it on many mobile setups
+// (no error, just lands back on the login screen). Redirect is only the fallback for
+// environments where popups genuinely don't work (blocked, or an installed PWA).
+export async function signInWithGoogle() {
+  try {
+    await signInWithPopup(auth, googleProvider)
+  } catch (err) {
+    const code = (err as { code?: string })?.code
+    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+      await signInWithRedirect(auth, googleProvider)
+      return
+    }
+    throw err
+  }
 }
 
 export function completeRedirectSignIn() {
