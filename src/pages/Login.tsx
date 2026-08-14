@@ -14,7 +14,9 @@ function authErrorMessage(err: unknown): string | null {
   if (code === 'auth/network-request-failed') {
     return 'Network error — check your connection and try again.'
   }
-  return code ? `Sign-in failed (${code}). Please try again.` : 'Sign-in failed. Please try again.'
+  const message = (err as { message?: string })?.message
+  const detail = code || message || String(err)
+  return `Sign-in failed: ${detail}`
 }
 
 export default function Login() {
