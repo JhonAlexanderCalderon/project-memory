@@ -4,7 +4,7 @@ import { useAuthContext } from '../lib/AuthContext'
 import { useProjectsContext } from '../lib/ProjectsContext'
 import { createProject } from '../data/projects'
 import ProjectCard from '../components/ProjectCard'
-import type { ProjectStatus } from '../types'
+import type { ProjectCategory, ProjectStatus } from '../types'
 
 const filters: { value: ProjectStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -14,22 +14,30 @@ const filters: { value: ProjectStatus | 'all'; label: string }[] = [
   { value: 'archived', label: 'Archived' },
 ]
 
+const categories: { value: ProjectCategory; label: string }[] = [
+  { value: 'professional', label: 'Professional' },
+  { value: 'personal', label: 'Personal' },
+]
+
 export default function Projects() {
   const { uid } = useAuthContext()
   const projects = useProjectsContext()
+  const [category, setCategory] = useState<ProjectCategory>('professional')
   const [filter, setFilter] = useState<ProjectStatus | 'all'>('active')
   const [showNew, setShowNew] = useState(false)
   const [name, setName] = useState('')
   const [purpose, setPurpose] = useState('')
+  const [newCategory, setNewCategory] = useState<ProjectCategory>('professional')
   const [saving, setSaving] = useState(false)
 
-  const visible = filter === 'all' ? projects : projects.filter((p) => p.status === filter)
+  const inCategory = projects.filter((p) => (p.category ?? 'professional') === category)
+  const visible = filter === 'all' ? inCategory : inCategory.filter((p) => p.status === filter)
 
   async function handleCreate() {
     if (!uid || !name.trim()) return
     setSaving(true)
     try {
-      await createProject(uid, { name: name.trim(), purpose: purpose.trim(), status: 'active', stage: 'idea' })
+      await createProject(uid, { name: name.trim(), purpose: purpose.trim(), category: newCategory, status: 'active', stage: 'idea' })
       setName('')
       setPurpose('')
       setShowNew(false)
@@ -43,14 +51,31 @@ export default function Projects() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-100">Projects</h1>
         <button
-          onClick={() => setShowNew(true)}
+          onClick={() => {
+            setNewCategory(category)
+            setShowNew(true)
+          }}
           className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-950"
         >
           <Plus size={14} /> New
         </button>
       </div>
 
-      <div className="mt-4 flex gap-1.5 overflow-x-auto pb-1">
+      <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-xl bg-slate-900 p-1 ring-1 ring-white/10">
+        {categories.map((c) => (
+          <button
+            key={c.value}
+            onClick={() => setCategory(c.value)}
+            className={`rounded-lg py-2 text-sm font-semibold transition-colors ${
+              category === c.value ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
         {filters.map((f) => (
           <button
             key={f.value}
@@ -87,6 +112,19 @@ export default function Projects() {
               <button onClick={() => setShowNew(false)} className="text-slate-500 hover:text-slate-300">
                 <X size={20} />
               </button>
+            </div>
+            <div className="mb-2 grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800 p-1 ring-1 ring-white/5">
+              {categories.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setNewCategory(c.value)}
+                  className={`rounded-lg py-1.5 text-xs font-semibold transition-colors ${
+                    newCategory === c.value ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
             </div>
             <input
               autoFocus

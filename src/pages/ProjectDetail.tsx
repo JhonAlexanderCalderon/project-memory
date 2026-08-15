@@ -12,10 +12,11 @@ import StatusBadge from '../components/StatusBadge'
 import StageBadge from '../components/StageBadge'
 import TaskItem from '../components/TaskItem'
 import ActivityItem from '../components/ActivityItem'
-import type { Project, ProjectStage, ProjectStatus, Task, Memory, Activity } from '../types'
+import type { Project, ProjectCategory, ProjectStage, ProjectStatus, Task, Memory, Activity } from '../types'
 
 const statusOptions: ProjectStatus[] = ['active', 'on_hold', 'completed', 'archived']
 const stageOptions: ProjectStage[] = ['idea', 'planning', 'development', 'testing', 'production']
+const categoryOptions: ProjectCategory[] = ['professional', 'personal']
 type Tab = 'overview' | 'tasks' | 'memory' | 'timeline'
 
 export default function ProjectDetail() {
@@ -123,6 +124,17 @@ export default function ProjectDetail() {
       </div>
 
       <div className="mt-3 flex gap-2">
+        <select
+          value={project.category ?? 'professional'}
+          onChange={(e) => updateProject(uid, id, { category: e.target.value as ProjectCategory })}
+          className="rounded-full bg-slate-900 px-2.5 py-1 text-xs font-medium text-slate-300 ring-1 ring-white/10"
+        >
+          {categoryOptions.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
         <select
           value={project.status}
           onChange={(e) => setProjectStatus(uid, project, e.target.value as ProjectStatus)}

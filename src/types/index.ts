@@ -1,10 +1,12 @@
 export type ProjectStatus = 'active' | 'on_hold' | 'completed' | 'archived'
 export type ProjectStage = 'idea' | 'planning' | 'development' | 'testing' | 'production'
+export type ProjectCategory = 'professional' | 'personal'
 
 export interface Project {
   id: string
   name: string
   purpose: string
+  category: ProjectCategory
   status: ProjectStatus
   stage: ProjectStage
   currentState: string

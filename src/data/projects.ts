@@ -1,11 +1,12 @@
 import { addDoc, deleteDoc, getDoc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore'
 import { projectDoc, projectsCol } from './paths'
 import { logActivity } from './activity'
-import type { Project, ProjectStage, ProjectStatus } from '../types'
+import type { Project, ProjectCategory, ProjectStage, ProjectStatus } from '../types'
 
 export interface NewProjectInput {
   name: string
   purpose: string
+  category: ProjectCategory
   status: ProjectStatus
   stage: ProjectStage
 }
