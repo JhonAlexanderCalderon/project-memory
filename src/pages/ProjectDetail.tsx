@@ -8,8 +8,6 @@ import { watchProjectTasks, createTask, setTaskStatus, deleteTask } from '../dat
 import { watchProjectMemories } from '../data/memories'
 import { watchProjectActivity } from '../data/activity'
 import { isWorkerConfigured, summarizeProject } from '../lib/workerClient'
-import StatusBadge from '../components/StatusBadge'
-import StageBadge from '../components/StageBadge'
 import TaskItem from '../components/TaskItem'
 import ActivityItem from '../components/ActivityItem'
 import type { Project, ProjectCategory, ProjectStage, ProjectStatus, Task, Memory, Activity } from '../types'
@@ -123,7 +121,7 @@ export default function ProjectDetail() {
         </button>
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         <select
           value={project.category ?? 'professional'}
           onChange={(e) => updateProject(uid, id, { category: e.target.value as ProjectCategory })}
@@ -157,10 +155,6 @@ export default function ProjectDetail() {
             </option>
           ))}
         </select>
-        <div className="flex gap-1.5">
-          <StatusBadge status={project.status} />
-          <StageBadge stage={project.stage} />
-        </div>
       </div>
 
       <div className="mt-5 flex gap-3 border-b border-white/10">
