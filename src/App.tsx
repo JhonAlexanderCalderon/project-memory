@@ -12,6 +12,7 @@ import Projects from './pages/Projects'
 import ProjectDetail from './pages/ProjectDetail'
 import Search from './pages/Search'
 import Settings from './pages/Settings'
+import SeedImport from './pages/SeedImport'
 
 function Gate() {
   const { user, loading } = useAuthContext()
@@ -33,6 +34,7 @@ function Gate() {
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/search" element={<Search />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/seed-import" element={<SeedImport />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
